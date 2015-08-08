@@ -30,3 +30,5 @@ function on_msg_receive (msg)
     --code here will be executed if message sender is on whitelist
   end
 end
+
+--add other methods for tg-cli if needed
