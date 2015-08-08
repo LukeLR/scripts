@@ -17,8 +17,8 @@ This is an instruction on how to whitelist telegram users for communication with
      - include the file path of your whitelist file, the sender's id (parsed to string) and the seperator you have chosen in your whitelist file
      - only if the sender's id is on your whitelist, the code will be executed.
      - feel free to add some else-clause to the if-clause in case the user is not whitelisted, for example an error message.
-     - **See the check-string-in-file_tg-
+     - **See the `check-string-in-file_tg-example.lua` for details.**
 6. Do some testing (e.g. by responding with a static message to any user that is on your whitelist), it should work now. If not, feel free to call for help ;)
 
 ##How it works
-When your telegram bot receives a message, it reads the sender's id and passes it to the `check` method of the string library (together with the whitelist file name and the separator character). The check method will first read the whitelist file into a table, and then cut away anything after the separator character in each line. Then the method will check if the given string (your sender's id) is included in that table of each line's first argument. It will return true if it does, and false if not. Only in case of true, the tg-lua-script will execute message handling code, if not, it will skip the handling code (and maybe respond with an error message). Hope it will help ;)
+When your telegram bot receives a message, it reads the sender's id and passes it to the `check` method of the string library (together with the whitelist file name and the separator character). The `check` method will first read the whitelist file into a table, and then cut away anything after the separator character in each line. Then the method will check if the given string (your sender's id) is included in that table of each line's first argument. It will return true if it does, and false if not. Only in case of true, the tg-lua-script will execute message handling code, if not, it will skip the handling code (and maybe respond with an error message). Hope it will help ;)
