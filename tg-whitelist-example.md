@@ -10,3 +10,7 @@ This is an instruction on how to whitelist telegram users for communication with
   - put the seperator character after the id
   - after the seperator character you can place any text of your choice (for example the name of the person the id belongs to, to avoid confusion).
 4. If you don't know the person's id that you want to be whitelisted, just execute an `user_info` on that person's contact in `tg-cli`.
+5. Now, edit your `tg-lua.lua`-script (or whatever script you use for your `tg-cli`) as follows:
+  1. Import the `check-string-in-file.lua`-library by adding a `dofile`-line at the top of your script, followed by the path of the library.
+  2. Edit your `on_msg_receive`-method as follows:
+     - Surround any commands regarding the parsing and answering of incoming messages with an if-clause which calls the 
