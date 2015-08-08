@@ -1,5 +1,5 @@
 # scripts
-Scripts I use in other projects or daily use
+Scripts I use in other projects or in daily use
 
 ##Contents
 ####check-string-in-file.lua
