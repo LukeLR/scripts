@@ -18,12 +18,14 @@
 
 -- checks if file contains string. only first argument in each line is checked, seperated by space (seperator)
 
+-- checks if file exists. Returns boolean true or false.
 function file_exists(file)
   local f = io.open(file, "rb")
   if f then f:close() end
   return f ~= nil
 end
 
+-- reads all lines from a file given by path. Result is returned as a table.
 function lines_from(file)
   if not file_exists(file) then return {} end
   lines = {}
@@ -42,6 +44,11 @@ function printtable(lines)
   end
 end
 
+--[[
+--** This function splits a given string, which is passed as
+--** str into substrings. The separating character is given
+--** as pat. The substrings are returned as a table.
+--]]
 function split(str, pat)
    local t = {}  -- NOTE: use {n = 0} in Lua-5.0
    local fpat = "(.-)" .. pat
@@ -61,24 +68,42 @@ function split(str, pat)
    return t
 end
 
-function extract(lines, seperator)
+--[[
+--** this function reads a table of string lines (read from
+--** the text file in this case), and cuts out the comments 
+--** which may be included in the line after a seperator Char.
+--** The seperator char that splits the lines in arguments and
+--** comments is passed as 'separator'. It returns a table of
+--** all the arguments that were included in the lines (any text
+--** in each line until an instance of 'separator' occurs).
+--]]
+function extract(lines, separator)
   local result = {}
   for k,v in pairs(lines) do
-    local splitted = split(v, ' ')
+    local splitted = split(v, separator)
     result[k] = splitted[1]
   end
   while (not lines[count] == nil) do
-    local splitted = Split(lines[count], ' ')
+    local splitted = Split(lines[count], separator)
     result[pos] = splitted[1]
     pos = pos + 1
     count = count + 1
-    print ("test")
   end
   return result
 end
 
-function check(file, string, seperator)
-  for k,v in pairs(extract(lines_from(file))) do
+--[[
+--** This is the actual main function. It will check if a given
+--** string is included in a file specified by file path. Only
+--** the first argument in each line of the text file will be
+--** read, anything else that follows in that line is treated
+--** as a comment and will be ignored. The char passed as
+--** 'separator' defines where the argument ends and the comment
+--** starts. It will return a Boolean true or false whether the
+--** string was included in the file or not.
+--]]
+function check(file, string, separator)
+  for k,v in pairs(extract(lines_from(file), separator)) do
     if v == string then
       print(file, " contains ", string, "!")
       return true
