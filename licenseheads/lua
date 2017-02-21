@@ -1,5 +1,3 @@
-#License headers:
-##Lua:
 --[[
 --** This file is part of LukeLR/scripts.
 --**
@@ -15,5 +13,5 @@
 --** with this copy of LukeLR/scripts. If not, see
 --** <https://creativecommons.org/licenses/by-nc-sa/3.0/legalcode>.
 --**
---** Copyright Lukas Rose 2015
+--** Copyright Lukas Rose 2017, public [at] lrose [dot] de
 --]]
