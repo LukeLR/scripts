@@ -1,4 +1,21 @@
 #!/bin/bash
+
+# This file is part of LukeLR/scripts.
+#
+# LukeLR/scripts is free software: you can redistribute it and/or
+# modify it under the terms of the cc-by-nc-sa (Creative Commons
+# Attribution-NonCommercial-ShareAlike) as released by the
+# Creative Commons organisation, version 3.0.
+#
+# LukeLR/scripts is distributed in the hope that it will be useful,
+# but without any warranty.
+#
+# You should have received a copy of the cc-by-nc-sa-license along
+# with this copy of LukeLR/scripts. If not, see
+# <https://creativecommons.org/licenses/by-nc-sa/3.0/legalcode>.
+#
+# Copyright Lukas Rose 2017, public [at] lrose [dot] de
+
 # This simple bash script will read the current and the maximum    #
 # brightness, calculate the step value for 10 steps of brightness, #
 # decrease the brightness by one step and write that value to the  #
