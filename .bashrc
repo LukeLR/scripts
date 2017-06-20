@@ -24,6 +24,7 @@ HISTSIZE=
 HISTFILESIZE=
 HISTTIMEFORMAT="%d.%m.%y %T "
 alias ll='ls -ahl'
+alias nano='nano -wi'
 PATH=$PATH:/home/lukas/bin
 
 # added by travis gem
@@ -33,3 +34,5 @@ PATH=$PATH:/home/lukas/bin
 eval $(thefuck --alias)
 
 export EDITOR=nano;
+
+source acd_func.sh
