@@ -14,7 +14,7 @@ shopt -s histappend
 alias ll='ls -ahl'
 alias nano='nano -$ -i'
 alias cat='cat --number'
-alias catn='cat'
+alias catn='/usr/bin/cat'
 PATH=$PATH:/home/lukas/bin
 
 # added by travis gem
