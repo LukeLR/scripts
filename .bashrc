@@ -12,7 +12,7 @@ HISTCONTROL=ignoreboth
 shopt -s histappend
 
 alias ll='ls -ahl'
-alias nano='nano -wi'
+alias nano='nano -$ -i'
 PATH=$PATH:/home/lukas/bin
 
 # added by travis gem
