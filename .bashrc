@@ -12,7 +12,7 @@ HISTCONTROL=ignoreboth
 shopt -s histappend
 
 alias ll='ls -ahl'
-alias nano='nano -$ -i'
+#alias nano='nano -$ -i'
 alias cat='cat --number'
 alias catn='/usr/bin/cat'
 alias recodeutf8='recode ISO8859-14..UTF-8 *'
