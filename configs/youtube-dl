@@ -1,5 +1,6 @@
 # youtube-dl config file
 # -- lines are arguments, not comments.
+# This goes in .config/youtube-dl/config
 --write-description
 --write-info-json
 --write-annotations
