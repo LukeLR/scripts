@@ -1,0 +1,11 @@
+# youtube-dl config file
+# -- lines are arguments, not comments.
+--write-description
+--write-info-json
+--write-annotations
+--write-all-thumbnails
+--console-title
+--all-subs
+--embed-subs
+--embed-thumbnail
+--add-metadata
