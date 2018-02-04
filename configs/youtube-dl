@@ -13,5 +13,4 @@
 --prefer-free-formats
 #--merge-output-format mkv
 --restrict-filenames
---format 
-bestvideo[width>=1080]+bestaudio/bestvideo[width>=720]+bestaudio/bestvideo+bestaudio/best
+--format bestvideo[width>=1080]+bestaudio/bestvideo[width>=720]+bestaudio/bestvideo+bestaudio/best
