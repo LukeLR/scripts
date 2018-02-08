@@ -1,0 +1,10 @@
+[Unit]
+Description=Update Ampache Libraries every 60 minutes.
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=60min
+Unit=ampacheupdate.service
+
+[Install]
+WantedBy=timers.target

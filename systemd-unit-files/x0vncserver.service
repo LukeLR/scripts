@@ -1,0 +1,11 @@
+[Unit]
+Description=Remote desktop service (VNC)
+After=syslog.target network.target
+
+[Service]
+Type=forking
+User=lukas
+ExecStart=/usr/bin/sh -c '/usr/bin/x0vncserver -display :0 -rfbport 5900 -passwordfile /home/lukas/.vnc/passwd &'
+
+[Install]
+WantedBy=multi-user.target

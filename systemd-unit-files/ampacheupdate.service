@@ -1,0 +1,9 @@
+[Unit]
+Description=Update Ampache libraries
+
+[Service]
+User=http
+ExecStart=/usr/bin/php -f /usr/share/webapps/ampache/bin/catalog_update.inc
+
+[Install]
+WantedBy=basic.target
