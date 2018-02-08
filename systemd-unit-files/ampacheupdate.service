@@ -1,9 +1,9 @@
 [Unit]
-Description=Nextcloud cron.php job
+Description=Update Ampache libraries
 
 [Service]
 User=http
-ExecStart=/usr/bin/php -f /usr/share/webapps/nextcloud/cron.php
+ExecStart=/usr/bin/php -f /usr/share/webapps/ampache/bin/catalog_update.inc
 
 [Install]
 WantedBy=basic.target
