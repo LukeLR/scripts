@@ -25,3 +25,4 @@ PATH=$PATH:/home/lukas/bin
 # eval $(thefuck --alias)
 
 export EDITOR=nano;
+export GPG_TTY=$(tty)
