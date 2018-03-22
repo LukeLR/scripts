@@ -2,8 +2,10 @@
 Description=Update Ampache Libraries every 60 minutes.
 
 [Timer]
-OnBootSec=5min
-OnUnitActiveSec=60min
+# OnBootSec=5min
+# OnUnitActiveSec=60min
+OnCalendar=*-*-* 00:00:00
+Persistent=true
 Unit=ampacheupdate.service
 
 [Install]
