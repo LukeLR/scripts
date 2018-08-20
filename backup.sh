@@ -6,15 +6,29 @@ echo "=================================="
 echo "Welcome to LukeLR's backup script!"
 echo "=================================="
 echo
+
+if [ $# -ne 5 ] then
+    echo "Illegal number of parameters. Needs 5 parameters:"
+    echo "backup.sh SOURCE VOLUME FOLDER USER SERVER"
+    echo
+    echo "Usage:"
+    echo "    SOURCE: Source folder to back up"
+    echo "    VOLUME: Name of the destination volume (on remote server)"
+    echo "    FOLDER: Backup folder on the destination volume"
+    echo "    USER  : User on remote machine"
+    echo "    SERVER: Address of remote machine"
+    echo "Exiting."
+fi
+
 echo "Preparing... Checking for free space... "
 
-source=/
-volume=/volumeUSB3/usbshare
-folder=Lukas-TP-Arch
-logfolder=/home/lukas/logs/backup
+source=$1
+volume=$2
+folder=$3
+logfolder=/var/log/backup/
 dest=$volume/$folder
-user=lukas
-server=192.168.2.100
+user=$4
+server=$5
 criticalspace=100000000
 
 date=$(date +%Y-%m-%d_%H-%M-%S)
