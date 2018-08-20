@@ -7,31 +7,44 @@ echo "Welcome to LukeLR's backup script!"
 echo "=================================="
 echo
 
-if [ $# -ne 5 ] then
-    echo "Illegal number of parameters. Needs 5 parameters:"
-    echo "backup.sh SOURCE VOLUME FOLDER USER SERVER"
+if [ $# -ne 3 ] then
+    echo "Illegal number of parameters. Needs 3 parameters:"
+    echo "backup.sh SOURCE VOLUME DESTINATION"
     echo
-    echo "Usage:"
-    echo "    SOURCE: Source folder to back up"
-    echo "    VOLUME: Name of the destination volume (on remote server)"
-    echo "    FOLDER: Backup folder on the destination volume"
-    echo "    USER  : User on remote machine"
-    echo "    SERVER: Address of remote machine"
+    echo "Parameters:"
+    echo "    SOURCE     : Source folder to back up"
+    echo "    VOLUME     : Name of the destination volume"
+    echo "    DESTINATION: Backup folder on the destination volume"
+    echo
+    echo "Format:"
+    echo "    SOURCE and DESTINATION can be one of the following:"
+    echo "        - user@server:folder (for ssh access)"
+    echo "        - folder (for local folders)"
     echo "Exiting."
+    return 1
 fi
 
 echo "Preparing... Checking for free space... "
 
 source=$1
 volume=$2
-folder=$3
-logfolder=/var/log/backup/
-dest=$volume/$folder
-user=$4
-server=$5
-criticalspace=100000000
+dest=$3
+logfolder=$HOME/log/backup/
+
+checklogfolder() {
+    if [ ! -d $logfolder ]; then
+        echo Creating log folder $logfolder
+        mkdir -p $logfolder
+    fi
+}
+
+checksource() {
+    
+}
 
 date=$(date +%Y-%m-%d_%H-%M-%S)
+
+
 
 freespace=$(ssh $user@$server "df" | grep $volume | awk '{ print $4 }')
 #freespace=0
