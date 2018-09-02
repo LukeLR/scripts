@@ -32,15 +32,15 @@ fi
 
 echo "Preparing... Checking for free space... "
 
-source=$1
-volume=$2
-dest=$3
-logfolder=$HOME/log/backup/
+SOURCE=$1
+VOLUME=$2
+DEST=$3
+LOGFOLDER=$HOME/log/backup/
 
 checklogfolder() {
-    if [ ! -d $logfolder ]; then
-        echo Creating log folder $logfolder
-        mkdir -p $logfolder
+    if [ ! -d $LOGFOLDER ]; then
+        echo Creating log folder $LOGFOLDER
+        mkdir -p $LOGFOLDER
     fi
 }
 
@@ -61,8 +61,13 @@ function gethost() {
     eval "$1=$(echo $2 | cut -d@ -f 2 | cut -d: -f 1)"
 }
 
-function getfolder() {
+function getpath() {
     eval "$1=$(echo $2 | cut -d: -f 2)"
+}
+
+function getcreds() {
+    eval "$1=$(echo $2 | cut -d: -f 2)"
+}
 
 SOURCEREMOTE=-1 # If SOURCE is on remote server
 DESTREMOTE=-1 # If DESTINATION is on remote server
@@ -74,39 +79,30 @@ DESTCREDS="" # Credentials for destination server
 DESTPATH="" # Path on destination server
 
 checksource() {
-    if (echo "$SOURCE" | grep -E ".+@.+:.+"); then
+    if isremote $source; then
         echo "$SOURCE is remote!"
         SOURCEREMOTE=1
+        getcreds SOURCECREDS $SOURCE
+        getpath SOURCEPATH $SOURCE
     else
         echo "$SOURCE is local!"
         SOURCEREMOTE=0
+        SOURCEPATH=$SOURCE
     fi
 }
 
-if isremote $source; then
-    echo Source $source is remote
-    sourceuser=''
-    sourcehost=''
-    sourcefolder=''
-    getuser sourceuser $source
-    gethost sourcehost $source
-    getfolder sourcefolder $source
-    echo $sourceuser@$sourcehost:$sourcefolder
-else
-    echo Source $source is local
-fi
-
-if isremote $dest; then
-    echo Destination $dest is remote
-    destuser=''
-    getuser destuser $dest
-    echo Destination user is $destuser
-else
-    echo Destination $dest is local
-fi
-
-echo $sourceuser
-echo $destuser
+checkdestination() {
+    if isremote $DEST; then
+        echo "$DEST is remote!"
+        DESTREMOTE=1
+        getcreds DESTCREDS $DEST
+        getpath DESTPATH $DEST
+    else
+        echo "$DEST is local!"
+        DESTREMOTE=0
+        DESTPATH=$DEST
+    fi
+}
 
 date=$(date +%Y-%m-%d_%H-%M-%S)
 
