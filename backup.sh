@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+#set -x
 set -o pipefail
 
 echo "=================================="
@@ -7,7 +8,7 @@ echo "Welcome to LukeLR's backup script!"
 echo "=================================="
 echo
 
-if [ $# -ne 3 ] then
+if [ $# -ne 3 ]; then
     echo "Illegal number of parameters. Needs 3 parameters:"
     echo "backup.sh SOURCE VOLUME DESTINATION"
     echo
@@ -17,11 +18,11 @@ if [ $# -ne 3 ] then
     echo "    DESTINATION: Backup folder on the destination volume"
     echo
     echo "Format:"
-    echo "    SOURCE and DESTINATION can be one of the following:"
-    echo "        - user@server:folder (for ssh access)"
+    echo "    SOURCE and DESTINATION must be valid rsync locations:"
+    echo "        - user@server:folder (for remote folders, ssh)"
     echo "        - folder (for local folders)"
     echo "Exiting."
-    return 1
+    exit 1
 fi
 
 echo "Preparing... Checking for free space... "
@@ -38,15 +39,57 @@ checklogfolder() {
     fi
 }
 
-checksource() {
-    
+isremote() {
+    if [[ $1 =~ ^.+@.+:.+ ]]; then
+        return 0
+    else
+        return 1
+    fi
 }
+
+# Usage: getuser returnvar $source; echo $returnvar
+function getuser() {
+    eval "$1=$(echo $2 | cut -d@ -f 1)"
+}
+
+function gethost() {
+    eval "$1=$(echo $2 | cut -d@ -f 2 | cut -d: -f 1)"
+}
+
+function getfolder() {
+    eval "$1=$(echo $2 | cut -d: -f 2)"
+}
+
+if isremote $source; then
+    echo Source $source is remote
+    sourceuser=''
+    sourcehost=''
+    sourcefolder=''
+    getuser sourceuser $source
+    gethost sourcehost $source
+    getfolder sourcefolder $source
+    echo $sourceuser@$sourcehost:$sourcefolder
+else
+    echo Source $source is local
+fi
+
+if isremote $dest; then
+    echo Destination $dest is remote
+    destuser=''
+    getuser destuser $dest
+    echo Destination user is $destuser
+else
+    echo Destination $dest is local
+fi
+
+echo $sourceuser
+echo $destuser
 
 date=$(date +%Y-%m-%d_%H-%M-%S)
 
 
 
-freespace=$(ssh $user@$server "df" | grep $volume | awk '{ print $4 }')
+#freespace=$(ssh $user@$server "df" | grep $volume | awk '{ print $4 }')
 #freespace=0
 maxspace=500000000
 
@@ -55,18 +98,19 @@ usemodernmethod=$false
 
 deleteoldestbackup() {
     echo Backups:
-    ssh $user@$server ls $dest
-    oldestbackup=$(ssh $user@$server ls -l $dest | grep -v ^t | awk '{ print $9 }' | head -n 1)
+    #ssh $user@$server ls $dest
+#    oldestbackup=$(ssh $user@$server ls -l $dest | grep -v ^t | awk '{ print $9 }' | 
+head -n 1)
     echo -ne "Oldest backup is $dest/$oldestbackup, removing..."
 #    ssh $user@$server "sudo rm -rvf $dest/$oldestbackup" >> $logfolder/$oldestbackup-delete.log
-    ssh $user@$server "echo Banane" >> $logfolder/$oldestbackup-delete
+#    ssh $user@$server "echo Banane" >> $logfolder/$oldestbackup-delete
     echo See $logfolder/$oldestbackup-delete.log for deletion logs.
-    echo 
+0    echo 
 }
 
 i=0
 if [ $freespace -lt $criticalspace ]; then
-    usedspace=$(ssh $user@$server "du -d 0 $dest"|awk '{ print $1 }')
+#    usedspace=$(ssh $user@$server "du -d 0 $dest"|awk '{ print $1 }')
     #usedspace=9999999999
     if [ $usemodernmethod ]; then
         #It should be at least as much space free as the backup occupies
@@ -109,8 +153,9 @@ echo Backup occupies: $usedspace KB
 echo Updating current snapshot...
 echo Will copy files now... See $logfolder/$date-create.log for rsync logs.
 
-sudo rsync -ave ssh --stats --delete --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/lost+found","CloudStation","Dropbox"} / $user@$server:$dest/current >> $logfolder/$date-create.log
+#sudo rsync -ave ssh --stats --delete 
+--exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/lost+found","CloudStation","Dropbox"} / $user@$server:$dest/current >> $logfolder/$date-create.log
 
 echo Making hardcopy to date folder...
-ssh $user@$server cp -alf $dest/current $dest/$date
+#ssh $user@$server cp -alf $dest/current $dest/$date
 echo "Done! Thanks for using this backup script. It was developed by lukas (public@lrose.de)!"
