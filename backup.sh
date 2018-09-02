@@ -1,4 +1,10 @@
 #!/bin/bash
+# LukeLR's backup script.
+# Dependencies:
+#     - rsync
+#     - df
+#     - hard links
+
 set -e
 set -o pipefail
 
@@ -8,18 +14,17 @@ echo "=================================="
 echo
 
 if [ $# -ne 3 ] then
-    echo "Illegal number of parameters. Needs 3 parameters:"
-    echo "backup.sh SOURCE VOLUME DESTINATION"
+    echo "Illegal number of parameters. Needs 2 parameters:"
+    echo "backup.sh SOURCE DESTINATION"
     echo
     echo "Parameters:"
     echo "    SOURCE     : Source folder to back up"
-    echo "    VOLUME     : Name of the destination volume"
     echo "    DESTINATION: Backup folder on the destination volume"
     echo
     echo "Format:"
     echo "    SOURCE and DESTINATION can be one of the following:"
-    echo "        - user@server:folder (for ssh access)"
-    echo "        - folder (for local folders)"
+    echo "        - user@server:path (for rsync / ssh access)"
+    echo "        - path (for local folders)"
     echo "Exiting."
     return 1
 fi
