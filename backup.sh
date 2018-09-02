@@ -43,8 +43,23 @@ checklogfolder() {
     fi
 }
 
+SOURCEREMOTE=-1 # If SOURCE is on remote server
+DESTREMOTE=-1 # If DESTINATION is on remote server
+
+SOURCECREDS="" # Credentials for source server
+SOURCEPATH="" # Path on source server
+
+DESTCREDS="" # Credentials for destination server
+DESTPATH="" # Path on destination server
+
 checksource() {
-    
+    if (echo "$SOURCE" | grep -E ".+@.+:.+"); then
+        echo "$SOURCE is remote!"
+        SOURCEREMOTE=1
+    else
+        echo "$SOURCE is local!"
+        SOURCEREMOTE=0
+    fi
 }
 
 date=$(date +%Y-%m-%d_%H-%M-%S)
