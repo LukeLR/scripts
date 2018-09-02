@@ -1,4 +1,10 @@
 #!/bin/bash
+# LukeLR's backup script.
+# Dependencies:
+#     - rsync
+#     - df
+#     - hard links
+
 set -e
 #set -x
 set -o pipefail
@@ -8,19 +14,18 @@ echo "Welcome to LukeLR's backup script!"
 echo "=================================="
 echo
 
-if [ $# -ne 3 ]; then
-    echo "Illegal number of parameters. Needs 3 parameters:"
-    echo "backup.sh SOURCE VOLUME DESTINATION"
+if [ $# -ne 2 ] then
+    echo "Illegal number of parameters. Needs 2 parameters:"
+    echo "backup.sh SOURCE DESTINATION"
     echo
     echo "Parameters:"
     echo "    SOURCE     : Source folder to back up"
-    echo "    VOLUME     : Name of the destination volume"
     echo "    DESTINATION: Backup folder on the destination volume"
     echo
     echo "Format:"
-    echo "    SOURCE and DESTINATION must be valid rsync locations:"
-    echo "        - user@server:folder (for remote folders, ssh)"
-    echo "        - folder (for local folders)"
+    echo "    SOURCE and DESTINATION can be one of the following:"
+    echo "        - user@server:path (for rsync / ssh access)"
+    echo "        - path (for local folders)"
     echo "Exiting."
     exit 1
 fi
@@ -58,6 +63,24 @@ function gethost() {
 
 function getfolder() {
     eval "$1=$(echo $2 | cut -d: -f 2)"
+
+SOURCEREMOTE=-1 # If SOURCE is on remote server
+DESTREMOTE=-1 # If DESTINATION is on remote server
+
+SOURCECREDS="" # Credentials for source server
+SOURCEPATH="" # Path on source server
+
+DESTCREDS="" # Credentials for destination server
+DESTPATH="" # Path on destination server
+
+checksource() {
+    if (echo "$SOURCE" | grep -E ".+@.+:.+"); then
+        echo "$SOURCE is remote!"
+        SOURCEREMOTE=1
+    else
+        echo "$SOURCE is local!"
+        SOURCEREMOTE=0
+    fi
 }
 
 if isremote $source; then
