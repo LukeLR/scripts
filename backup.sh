@@ -4,6 +4,10 @@
 #     - rsync
 #     - df
 #     - hard links
+#     - grep
+#     - cut
+#     - du
+#     - df
 
 set -e
 #set -x
@@ -66,7 +70,7 @@ function getpath() {
 }
 
 function getcreds() {
-    eval "$1=$(echo $2 | cut -d: -f 2)"
+    eval "$1=$(echo $2 | cut -d: -f 1)"
 }
 
 SOURCEREMOTE=-1 # If SOURCE is on remote server
@@ -79,15 +83,19 @@ DESTCREDS="" # Credentials for destination server
 DESTPATH="" # Path on destination server
 
 checksource() {
-    if isremote $source; then
+    if isremote $SOURCE; then
         echo "$SOURCE is remote!"
         SOURCEREMOTE=1
         getcreds SOURCECREDS $SOURCE
         getpath SOURCEPATH $SOURCE
+        SOURCESIZE=$(ssh $SOURCECREDS du -s $SOURCEPATH|cut -d$'\t' -f 1)
+        echo "Size of $SOURCE: ${SOURCESIZE}K"
     else
         echo "$SOURCE is local!"
         SOURCEREMOTE=0
         SOURCEPATH=$SOURCE
+        SOURCESIZE=$(du -s $SOURCEPATH|cut -d$'\t' -f 1)
+        echo "Size of $SOURCE: ${SOURCESIZE}K"
     fi
 }
 
@@ -97,16 +105,22 @@ checkdestination() {
         DESTREMOTE=1
         getcreds DESTCREDS $DEST
         getpath DESTPATH $DEST
+        DESTAVAIL=$(ssh $DESTCREDS "df --output='avail' $DESTPATH"|cut -d$'\n' -f 2)
+        echo "Free Space available at $DEST: ${DESTAVAIL}K"
     else
         echo "$DEST is local!"
         DESTREMOTE=0
         DESTPATH=$DEST
+        DESTAVAIL=$(df --output="avail" $DESTPATH|cut -d$'\n' -f 2)
+        echo "Free Space available at $DEST: ${DESTAVAIL}K"
     fi
 }
 
-date=$(date +%Y-%m-%d_%H-%M-%S)
+checkfreespace() {
+    
+}
 
-
+DATE=$(date +%Y-%m-%d_%H-%M-%S)
 
 #freespace=$(ssh $user@$server "df" | grep $volume | awk '{ print $4 }')
 #freespace=0
