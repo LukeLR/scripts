@@ -11,14 +11,14 @@
 
 set -e
 #set -x
-set -o pipefail
+#set -o pipefail
 
 echo "=================================="
 echo "Welcome to LukeLR's backup script!"
 echo "=================================="
 echo
 
-if [ $# -ne 2 ] then
+if [ $# -ne 2 ]; then
     echo "Illegal number of parameters. Needs 2 parameters:"
     echo "backup.sh SOURCE DESTINATION"
     echo
@@ -37,8 +37,7 @@ fi
 echo "Preparing... Checking for free space... "
 
 SOURCE=$1
-VOLUME=$2
-DEST=$3
+DEST=$2
 LOGFOLDER=$HOME/log/backup/
 
 checklogfolder() {
@@ -84,14 +83,14 @@ DESTPATH="" # Path on destination server
 
 checksource() {
     if isremote $SOURCE; then
-        echo "$SOURCE is remote!"
+        echo "Source $SOURCE is remote!"
         SOURCEREMOTE=1
         getcreds SOURCECREDS $SOURCE
         getpath SOURCEPATH $SOURCE
         SOURCESIZE=$(ssh $SOURCECREDS du -s $SOURCEPATH|cut -d$'\t' -f 1)
         echo "Size of $SOURCE: ${SOURCESIZE}K"
     else
-        echo "$SOURCE is local!"
+        echo "Source $SOURCE is local!"
         SOURCEREMOTE=0
         SOURCEPATH=$SOURCE
         SOURCESIZE=$(du -s $SOURCEPATH|cut -d$'\t' -f 1)
@@ -101,14 +100,14 @@ checksource() {
 
 checkdestination() {
     if isremote $DEST; then
-        echo "$DEST is remote!"
+        echo "Destination $DEST is remote!"
         DESTREMOTE=1
         getcreds DESTCREDS $DEST
         getpath DESTPATH $DEST
         DESTAVAIL=$(ssh $DESTCREDS "df --output='avail' $DESTPATH"|cut -d$'\n' -f 2)
         echo "Free Space available at $DEST: ${DESTAVAIL}K"
-    else
-        echo "$DEST is local!"
+    elses
+        echo "Destination $DEST is local!"
         DESTREMOTE=0
         DESTPATH=$DEST
         DESTAVAIL=$(df --output="avail" $DESTPATH|cut -d$'\n' -f 2)
@@ -116,10 +115,14 @@ checkdestination() {
     fi
 }
 
+checksource
+checkdestination
+
 checkfreespace() {
     
 }
 
+exit 0
 DATE=$(date +%Y-%m-%d_%H-%M-%S)
 
 #freespace=$(ssh $user@$server "df" | grep $volume | awk '{ print $4 }')
