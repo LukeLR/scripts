@@ -1,17 +1,14 @@
 #!/bin/bash
 # LukeLR's backup script.
 # Dependencies:
-#     - rsync
-#     - df
-#     - hard links
-#     - grep
-#     - cut
-#     - du
-#     - df
-
-set -e
-#set -x
-#set -o pipefail
+#  - rsync
+#  - df
+#  - hard links
+#  - grep
+#  - cut
+#  - du
+#  - df
+#  - awk
 
 echo "=================================="
 echo "Welcome to LukeLR's backup script!"
@@ -77,14 +74,17 @@ DESTREMOTE=-1 # If DESTINATION is on remote server
 
 SOURCECREDS="" # Credentials for source server
 SOURCEPATH="" # Path on source server
+SOURCESEPARATOR="" # Separator between credentials and path on source server
 
 DESTCREDS="" # Credentials for destination server
 DESTPATH="" # Path on destination server
+DESTSEPARATOR="" # Separator between credentials and path on destination server
 
 checksource() {
     if isremote $SOURCE; then
         echo "Source $SOURCE is remote!"
         SOURCEREMOTE=1
+        SOURCESEPARATOR=:
         getcreds SOURCECREDS $SOURCE
         getpath SOURCEPATH $SOURCE
         SOURCESIZE=$(ssh $SOURCECREDS du -s $SOURCEPATH|cut -d$'\t' -f 1)
@@ -92,6 +92,8 @@ checksource() {
     else
         echo "Source $SOURCE is local!"
         SOURCEREMOTE=0
+        SOURCESEPARATOR=
+        SOURCECREDS=
         SOURCEPATH=$SOURCE
         SOURCESIZE=$(du -s $SOURCEPATH|cut -d$'\t' -f 1)
         echo "Size of $SOURCE: ${SOURCESIZE}K"
@@ -102,13 +104,16 @@ checkdestination() {
     if isremote $DEST; then
         echo "Destination $DEST is remote!"
         DESTREMOTE=1
+        DESTSEPARATOR=:
         getcreds DESTCREDS $DEST
         getpath DESTPATH $DEST
         DESTAVAIL=$(ssh $DESTCREDS "df --output='avail' $DESTPATH"|cut -d$'\n' -f 2)
         echo "Free Space available at $DEST: ${DESTAVAIL}K"
-    elses
+    else
         echo "Destination $DEST is local!"
         DESTREMOTE=0
+        DESTSEPARATOR=
+        DESTCREDS=
         DESTPATH=$DEST
         DESTAVAIL=$(df --output="avail" $DESTPATH|cut -d$'\n' -f 2)
         echo "Free Space available at $DEST: ${DESTAVAIL}K"
@@ -118,80 +123,52 @@ checkdestination() {
 checksource
 checkdestination
 
-checkfreespace() {
-    
+echo Starting copying files from $SOURCEPATH on $SOURCECREDS to $DESTPATH on $DESTCREDS...
+
+NUMBEROFTRIES=0 # How often rsync has failed already
+MAXNUMBEROFTRIES=10 # How often to try to copy
+
+deleteoldestbackup(){
+    if [ $DESTREMOTE -eq 1 ]; then
+        OLDESTBACKUP=$(ssh $DESTCREDS "ls -l $DESTPATH" | awk '{print $9}' | head -n 2 | tail -n 1)
+    else
+        OLDESTBACKUP=$(ls -l $DESTPATH | awk '{print $9}' | head -n 2 | tail -n 1)
+    fi
+    echo Oldest backup on $DEST is $OLDESTBACKUP. Deleting...
+
+    if [ $DESTREMOTE -eq 1 ]; then
+        ssh $DESTCREDS "rm -rf $DESTPATH/$OLDESTBACKUP"
+    else
+        rm -rf $DESTPATH/$OLDESTBACKUP
+    fi
 }
 
-exit 0
+copyfiles(){
+    rsync -aPe ssh $SOURCECREDS$SOURCESEPARATOR$SOURCEPATH $DESTCREDS$DESTSEPARATOR$DESTPATH/current/
+    RSYNCEXIT=$?
+    echo Rsync process exited with exit code $RSYNCEXIT.
+
+    if [ $RSYNCEXIT -eq 11 ]; then # For example no free disk space
+        NUMBEROFTRIES=$(($NUMBEROFTRIES + 1))
+        if [ $NUMBEROFTRIES -lt $MAXNUMBEROFTRIES ]; then
+            echo Retry backup no. $NUMBEROFTRIES
+            deleteoldestbackup
+            copyfiles
+        else
+            echo "Maximum number of tries reached ($MAXNUMBEROFTRIES). Aborting!"
+            exit 1
+        fi
+    fi
+}
+
+copyfiles
+
 DATE=$(date +%Y-%m-%d_%H-%M-%S)
 
-#freespace=$(ssh $user@$server "df" | grep $volume | awk '{ print $4 }')
-#freespace=0
-maxspace=500000000
-
-#Set to 0 to use traditional maxspace-method, 1 for modern at least as much free as occupied-method.
-usemodernmethod=$false
-
-deleteoldestbackup() {
-    echo Backups:
-    #ssh $user@$server ls $dest
-#    oldestbackup=$(ssh $user@$server ls -l $dest | grep -v ^t | awk '{ print $9 }' | 
-head -n 1)
-    echo -ne "Oldest backup is $dest/$oldestbackup, removing..."
-#    ssh $user@$server "sudo rm -rvf $dest/$oldestbackup" >> $logfolder/$oldestbackup-delete.log
-#    ssh $user@$server "echo Banane" >> $logfolder/$oldestbackup-delete
-    echo See $logfolder/$oldestbackup-delete.log for deletion logs.
-0    echo 
-}
-
-i=0
-if [ $freespace -lt $criticalspace ]; then
-#    usedspace=$(ssh $user@$server "du -d 0 $dest"|awk '{ print $1 }')
-    #usedspace=9999999999
-    if [ $usemodernmethod ]; then
-        #It should be at least as much space free as the backup occupies
-        echo "Using modern method to determine space limits..."
-        echo
-        while [ $freespace -lt $usedspace ] && [ $i -lt 50 ]; do
-            echo Undershot minimum free space! It should be at least as much space free as the backup occupies!
-            echo Free space available: $freespace KB.
-            echo Backup occupies: $usedspace KB.
-            echo Deleting oldest backup \#$i...
-            deleteoldestbackup
-            echo
-            let i=i+1
-       done
-    else
-        echo "Using traditional method to determine space limits..."
-        echo
-        while [ $usedspace -gt $maxspace ] && [ $i -lt 50 ]; do
-            echo Exceeded maximum space!
-            echo Free space available: $freespace KB.
-            echo Backup occupies: $usedspace KB.
-            echo Space limit is at $maxspace KB!
-            echo Deleting oldest backup \#$i...
-            deleteoldestbackup
-            echo
-            let i=i+1
-       done
-    fi
+echo Hardlinking current backup to $DATE...
+if [ $DESTREMOTE -eq 1 ]; then
+    ssh $DESTCREDS "cp -alf $DESTPATH/current $DESTPATH/$DATE"
 else
-    echo "Free space is not below critical level:"
-    echo "Free space: $freespace K."
-    echo "Critical level: $criticalspace K."
-    echo
+    cp -alf $DESTPATH/current $DESTPATH/$DATE
 fi
-
-echo Enough free space!
-echo Free space available: $freespace KB
-echo Backup occupies: $usedspace KB
-
-echo Updating current snapshot...
-echo Will copy files now... See $logfolder/$date-create.log for rsync logs.
-
-#sudo rsync -ave ssh --stats --delete 
---exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/lost+found","CloudStation","Dropbox"} / $user@$server:$dest/current >> $logfolder/$date-create.log
-
-echo Making hardcopy to date folder...
-#ssh $user@$server cp -alf $dest/current $dest/$date
-echo "Done! Thanks for using this backup script. It was developed by lukas (public@lrose.de)!"
+exit 0
