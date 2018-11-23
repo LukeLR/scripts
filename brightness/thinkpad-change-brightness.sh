@@ -18,13 +18,13 @@
 
 # This simple bash script will read the current and the maximum    #
 # brightness, calculate the step value for 10 steps of brightness, #
-# increase the brightness by one step and write that value to the  #
+# decrease the brightness by one step and write that value to the  #
 # current brightness. This script is designed for use on my 27"    #
 # iMac late 2012, but should work with most other laptops /        #
 # all-in-one-desktops equally well.                                #
 
 # where all the files are located
-base_path=/sys/class/backlight/acpi_video0/
+base_path=/sys/class/backlight/intel_backlight/
 
 # the name of the file where the current brightness is saved in
 current_file=brightness
@@ -42,13 +42,26 @@ max=$(cat $base_path$max_file)
 echo current value: $current of $max
 
 # calculate step value
-((step=max/10))
-
-# echo step value
-echo increasing brightness by $step ...
+((step=max/20))
 
 # calculate new value
-((new=current+step))
+if [ "$1" == "d" ]; then
+    # echo step value
+    echo decreasing brightness by $step ...
+    ((new=current-step))
+else
+    # echo step value
+    echo increasing brightness by $step ...
+    ((new=current+step))
+fi
+
+if [ $new -gt $max ]; then
+    new=$max
+else
+    if [ $new -lt 0 ]; then
+        new=0
+    fi
+fi
 
 # echo new value
 echo setting new value: $new
