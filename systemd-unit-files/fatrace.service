@@ -1,8 +1,0 @@
-[Unit]
-Description=Fatrace filesystem access tracing
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/fatrace -t -o /tmp/fatrace.log -s 10
-ExecStartPost=/bin/bash -c \"mv /tmp/fatrace.log /var/log/fatrace/fatrace-$(date +%d-%m-%Y_%H-%M-%S).log\"
-Restart=always

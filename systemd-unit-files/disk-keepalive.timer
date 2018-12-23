@@ -1,9 +1,0 @@
-[Unit]
-Description=Touch a file on the filesystems root every two minutes to keep the hard disk from hibernating.
-
-[Timer]
-OnCalendar=*:0/2
-Persistent=true
-
-[Install]
-WantedBy=timers.target

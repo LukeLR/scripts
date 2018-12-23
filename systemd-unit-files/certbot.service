@@ -1,8 +1,0 @@
-[Unit]
-Description=Let's Encrypt renewal
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/certbot renew --agree-tos --post-hook "systemctl reload httpd.service"
-ExecStartPost=/bin/bash -c 'sudo cat /etc/letsencrypt/live/home.lrose.de/{privkey,cert,chain}.pem > /var/lib/znc/.znc/znc.pem; sudo chown znc:znc /var/lib/znc/.znc/znc.pem; sudo chmod 0600 /var/lib/znc/.znc/znc.pem'
-ExecStartPost=/usr/bin/sh -c 'sudo journalctl -u certbot --since "1 min ago" | mail -s "Letsencrypt certbot renew on Archlinux Server" admin@lrose.de'
